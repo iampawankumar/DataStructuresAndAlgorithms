@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JWS Verification with JWK</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/elliptic/6.5.4/elliptic.min.js"></script>
+  <script>
+    // Function to base64url decode
+    function base64UrlDecode(input) {
+      let base64 = input.replace(/-/g, '+').replace(/_/g, '/');
+      base64 += '='.repeat((4 - base64.length % 4) % 4);
+      return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+    }
+
+    // Function to convert JWK to raw public key
+    function jwkToRawPublicKey(jwk) {
+      const x = base64UrlDecode(jwk.x);
+      const y = base64UrlDecode(jwk.y);
+      const rawPublicKey = new Uint8Array(65);
+      rawPublicKey[0] = 0x04; // Uncompressed point indicator
+      rawPublicKey.set(x, 1);
+      rawPublicKey.set(y, 33);
+      return rawPublicKey;
+    }
+
+    // Function to verify JWS
+    function verifyJWS(jws, jwk) {
+      const EC = elliptic.ec;
+      const ec = new EC('secp256k1');
+
+      // Split JWS into parts
+      const [encodedHeader, encodedPayload, encodedSignature] = jws.split('.');
+      if (!encodedHeader || !encodedPayload || !encodedSignature) {
+        throw new Error('Invalid JWS format');
+      }
+
+      // Decode the components
+      const header = base64UrlDecode(encodedHeader);
+      const payload = base64UrlDecode(encodedPayload);
+      const signature = base64UrlDecode(encodedSignature);
+
+      // Create the message to verify
+      const message = new Uint8Array([...encodedHeader, ...'.'.split('').map(c => c.charCodeAt(0)), ...encodedPayload]);
+      console.log("🚀 ~ verifyJWS ~ message:", message)
+
+      // Convert signature to r and s
+      const r = signature.slice(0, 32);
+      console.log("🚀 ~ verifyJWS ~ r:", r)
+      const s = signature.slice(32, 64);
+      console.log("🚀 ~ verifyJWS ~ s:", s)
+
+      // Convert JWK to raw public key
+      const rawPublicKey = jwkToRawPublicKey(jwk);
+      console.log("🚀 ~ verifyJWS ~ rawPublicKey:", rawPublicKey)
+      const key = ec.keyFromPublic(rawPublicKey);
+      console.log("🚀 ~ verifyJWS ~ key:", key)
+
+      // Verify the signature
+      return key.verify(message, { r: r.toString('hex'), s: s.toString('hex') });
+    }
+
+    // Example usage
+    document.addEventListener('DOMContentLoaded', () => {
+      const jws = 'eyJhbGciOiJFUzI1NksifQ.eyJhc2NzZGNzZCI6ImFkc2NzZHNkYyJ9.Fclz9apXSrhiLRUNwu2gl3--_peVGmZxA56KFAfLSA5FZfqO08UJXorhXQvBjdCKLi_wLXh38Ea6EpWQH2jMcA';
+      const jwk = {"kty":"EC",
+      "x":"n7cYPrmfFxxQrc1JyxpXbermZ7Y42Pg3BqfiQqPF1Nw",
+      "y":"0OTgBmNo9MS_BicF-fQPJO8B5knoIm6YnhuXaGaJTnU",
+      "crv":"secp256k1"
+    }
+      const isValid = verifyJWS(jws, jwk);
+      console.log('JWS is valid:', isValid);
+    });
+  </script>
+</head>
+<body>
+  <h1>JWS Verification with JWK</h1>
+</body>
+</html>

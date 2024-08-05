@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <div
+    style="
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-width: 250px;
+        margin: 0 auto;
+        margin-top: auto;
+        margin-top: 100px;
+        text-align: center;
+        "
+    >
+        <div id="like_button"
+        style="    padding: 10px;
+        background: #7e7ef7;
+        border-radius: 4px;
+        color: white;
+        font-family: cursive;
+        cursor: pointer;"
+        >Like</div>
+        <div id="like_count"
+        style="margin-top: 10px;
+        font-family: cursive;
+        border: 2px solid #f7f7f7;
+        padding: 10px;
+        border-radius: 4px;"
+        >0</div>
+
+        <div class="toaster_msg_container"
+        style="position: absolute;
+        display: none;
+        bottom: 10px;
+        left: 0;
+        background: #84bb84;
+        border: 1px solid transparent;
+        width: 200px;
+        padding: 20px;
+        border-radius: 4px;
+        font-family: cursive;
+        color: white;
+        font-size: 13px;"
+        >
+            <div class="toaster_msg"></div>
+        </div>
+
+    </div>
+
+    <script src="./OptimisticUiUpdates.js"></script>
+</body>
+</html>

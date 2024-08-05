@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWE with X25519 Example</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jose/5.6.2/index.js"></script>
+</head>
+<body>
+  <script>
+    async function main() {
+      const { generateKeyPair, compactEncrypt, compactDecrypt, importJWK, exportJWK } = jose;
+
+      // Generate X25519 key pair
+      const { publicKey, privateKey } = await generateKeyPair('X25519');
+
+      // Export the public and private keys as JWK
+      const publicJwk = await exportJWK(publicKey);
+      const privateJwk = await exportJWK(privateKey);
+
+      console.log('Public JWK:', publicJwk);
+      console.log('Private JWK:', privateJwk);
+
+      // Import the keys from JWK
+      const publicKeyImported = await importJWK(publicJwk, 'X25519');
+      const privateKeyImported = await importJWK(privateJwk, 'X25519');
+
+      // Payload to encrypt
+      const payload = new TextEncoder().encode('Hello, world!');
+
+      // Encrypt the payload using the public key
+      const jwe = await new compactEncrypt(payload)
+        .setProtectedHeader({ alg: 'ECDH-ES', enc: 'A256GCM' })
+        .encrypt(publicKeyImported);
+
+      console.log('JWE:', jwe);
+
+      // Decrypt the JWE using the private key
+      const { plaintext } = await compactDecrypt(jwe, privateKeyImported);
+
+      console.log('Decrypted Text:', new TextDecoder().decode(plaintext));
+    }
+
+    main().catch(err => console.error(err));
+  </script>
+</body>
+</html>
